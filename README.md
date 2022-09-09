@@ -40,6 +40,7 @@ conda install pytorch torchvision torchaudio cpuonly -c pytorch
 conda install pytorch torchvision torchaudio -c pytorch
 ```
 
+## Running the normal linear regression
 Once the proper version of Python and dependencies are installed, run the main program with
 
 ```python main.py```
@@ -51,6 +52,18 @@ the unit tests with
 and the auto-formatter with
 
 ```black main.py```
+
+## Running with neural network
+If you want to train the models for 10 folds,
+```
+python neural_net_train.py
+```
+This will automatically export `history.npz` where there is the mse losses and best model data. It also exports 10 models for 10 folds in the `./models` folder. After that, run:
+
+```
+python neural_net_eval.py
+```
+This will pick the best model to export the results.
 
 ## Contents
  - main.py contains the regression program
