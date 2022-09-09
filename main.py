@@ -80,7 +80,7 @@ class LinearRegression:
         if self.w is None:
             raise ValueError("Model has not been fitted with predict yet.")
         X = np.concatenate((X, np.ones((len(X), 1))), axis=1) if self.bias else X
-        return np.sum((np.dot(X, self.w) - y) ** 2)
+        return float(np.sum((np.dot(X, self.w) - y) ** 2))
 
 
 class NoTransform:
@@ -97,6 +97,7 @@ class NoTransform:
 
     def fit_transform(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
         return X
+
 
 def cross_validation(
     reg: RegressorMixin, X: np.ndarray, y: np.ndarray, k: int
