@@ -22,6 +22,24 @@ Alternatively, using Python 3.10.4 and conda, create a virtual environment and i
 
 ```conda install black numpy pytest scikit-learn```
 
+
+If you want to test the neural network, install these dependencies:
+For Python and pip:
+```
+# For Window and Mac:
+pip install torch torchvision torchaudio
+# For Linux
+pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+For Anaconda:
+```
+# For Window and Linux:
+conda install pytorch torchvision torchaudio cpuonly -c pytorch
+# For Mac:
+conda install pytorch torchvision torchaudio -c pytorch
+```
+
 Once the proper version of Python and dependencies are installed, run the main program with
 
 ```python main.py```
