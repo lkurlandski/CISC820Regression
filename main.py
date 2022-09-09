@@ -77,6 +77,8 @@ class LinearRegression:
         Returns:
             MSR score
         """
+        if self.w is None:
+            raise ValueError("Model has not been fitted with predict yet.")
         X = np.concatenate((X, np.ones((len(X), 1))), axis=1) if self.bias else X
         return np.sum((np.dot(X, self.w) - y) ** 2)
 
