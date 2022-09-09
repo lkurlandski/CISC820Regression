@@ -3,10 +3,11 @@ Viet and Luke
 CISC-820: Quantitative Foundations
 Project 1: Linear Feature Engineering
 """
+# %%
 
 from __future__ import annotations
 import json
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 from sklearn.base import RegressorMixin
@@ -24,7 +25,7 @@ class LinearRegression:
 
     w: Optional[np.ndarry]
 
-    def __init__(self, bias: bool):
+    def __init__(self, bias: bool, which_feature: List[int]=None, n_expand: int=None):
         """Create the regression model.
 
         Args:
@@ -32,6 +33,8 @@ class LinearRegression:
         """
         self.bias = bias
         self.w = None
+        self.which_feature = which_feature
+        self.n_expand = n_expand
 
     def __repr__(self):
         return f"LinearRegression(bias={self.bias})"
@@ -46,7 +49,17 @@ class LinearRegression:
         Returns:
             the fitted model
         """
+        # Perform poly expansion
+        if self.which_feature and self.n_expand:
+            # There the number of features can be reduced due to pca, so no need to perform them
+            try:
+                X = poly_expand(X, self.which_feature, self.n_expand)
+            except:
+                pass
+
+        # Bias term addition
         X = np.concatenate((X, np.ones((len(X), 1))), axis=1) if self.bias else X
+        
         s = np.dot(y, X)
         M = np.dot(X.T, X)
         self.w = np.linalg.solve(M, s)
@@ -82,6 +95,33 @@ class LinearRegression:
         X = np.concatenate((X, np.ones((len(X), 1))), axis=1) if self.bias else X
         return float(np.sum((np.dot(X, self.w) - y) ** 2))
 
+def poly_expand(X: np.ndarray, which_feature: List[int], n_expand: int) -> np.ndarray:
+    """ Perform polynomial expansion
+
+    Args:
+        X (np.ndarray): 2D features. each column is one instance. Expand row rules:
+        x -> 1 -> x^2 -> x^3 -> x^4 -> etc.
+
+    Returns:
+        np.ndarray: _description_
+    """
+    rows, cols = X.shape
+    X_hats = []
+    for feature in which_feature:
+        
+        assert feature < cols, "Wrong feature to expand."
+
+        X_hat = np.array(X[:, which_feature])[..., np.newaxis] # (rows, 1)
+        X_hat = np.broadcast_to(X_hat, (rows, n_expand)) # (rows, n_expand)
+        
+        power_mat = np.array([(2 + i) for i in range(n_expand)])  # power_mat without first or 2 first rows: [2,3,4,5,6...]
+        power_mat = power_mat[np.newaxis, ...] # (1, n_expand): [[2,3,4,5,6...]]
+        power_mat = np.broadcast_to(power_mat, (rows, n_expand)) # (rows, n_expand): [[2,3,4,5,6...]; [2,3,4,5,6...]; [2,3,4,5,6...]; ...]
+
+        X_hat = np.power(X_hat, power_mat)
+        X_hats.append(X_hat)
+
+    return np.concatenate((X, *X_hat), axis=1)
 
 class NoTransform:
     """Adheres to the scikit-learn transformation API, but does not transform anything."""
@@ -151,8 +191,13 @@ def main():
     ]
     regressors = [
         lambda: LinearRegression(True),
-        lambda: LinearRegression(False)
+        lambda: LinearRegression(False),
+        lambda: LinearRegression(True, [2], 15),
+        lambda: LinearRegression(False, [4, 6], 5),
+        lambda: LinearRegression(True, [1, 0, 4], 10),
+        lambda: LinearRegression(False, [0,1,2,3,4,5,6,7], 3),
     ]
+    
     # Store regression results from all combinations of preprocessing and regression
     results = []
     for normalizer in normalizers:
@@ -180,6 +225,16 @@ def main():
     with open(f"results.json", "w") as f:
         json.dump(results, f, indent=4)
     np.savetxt("testoutputs.txt", results[0]["Predictions"])
+
+
+    # print(f"Shape x: {X.shape}; shape y: {y.shape}; test input shape: {test_data.shape}")
+    # reg = LinearRegression_v2(True)
+    
+    # Xx = reg.poly_expand(X[:, 0:1], 0, 1)
+    # print(np.mean(X[:, 0]))
+    # print(np.mean(Xx[:, 1]))
+
+
 
 
 if __name__ == "__main__":
