@@ -88,7 +88,7 @@ def train_and_save_model(X_train, X_val, y_train, y_val, fold):
     model.train()
     model_path = f"./models/model_fold_{fold}.pth"
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    val_losses = []
+
     n_epochs = 10
     best_mean_val_loss = 1e8
     for i in range(n_epochs):
@@ -107,21 +107,18 @@ def train_and_save_model(X_train, X_val, y_train, y_val, fold):
             optimizer.step()
         
         with torch.no_grad():
-            try:
-                batch_val_x, batch_val_y = next(val_it)
-            except:
-                val_it = iter(val_loader)
-                batch_val_x, batch_val_y = next(val_it)
-            val_out = model(batch_val_x)
-            val_loss = torch.nn.functional.mse_loss(val_out, batch_val_y)
+            val_out = model(torch.from_numpy(X_val).float())
+            val_label = torch.from_numpy(y_val).float()
+            val_loss = torch.nn.functional.mse_loss(val_out, val_label)
             print(f"[Epoch {i + 1}] Validation loss: {val_loss}")
-            val_losses.append(val_loss.item())
+            # val_losses.append(val_loss.item())
 
         ## Save model
         if val_loss < best_mean_val_loss:
+            best_mean_val_loss = val_loss
             torch.save(model.state_dict(), model_path)
 
-    return np.mean(val_losses)
+    return best_mean_val_loss
 
 def main():
     """Test different transformations and models and record predictions for test data.
