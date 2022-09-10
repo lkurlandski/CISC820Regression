@@ -10,7 +10,6 @@ import numpy as np
 
 
 class NN:
-
     def fit(self, X: np.ndarray, y: np.ndarray) -> NN:
         raise NotImplementedError()
 

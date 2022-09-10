@@ -9,6 +9,7 @@ from typing import Optional
 
 import numpy as np
 
+
 class NotFittedError(ValueError):
     ...
 
@@ -18,7 +19,7 @@ class LR:
 
     w: Optional[np.ndarry]
 
-    def __init__(self, bias : bool = True):
+    def __init__(self, bias: bool = True):
         """Create the regression model.
 
         Args:

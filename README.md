@@ -70,8 +70,12 @@ python neural_net_eval.py
 This will pick the best model to export the results.
 
 ## Contents
- - main.py contains the regression program
+ - linear_regression.py: contains the linear regression model
+ - main.py: drives the experiments
+ - neural_net.py: contains the neural network model (wrapper)
+ - results.json: results from every version of regression performed
+ - testinputs.txt: file provided by the instructor
+ - testoutputs.txt: predictions corresponding to testinputs.txt from the best regression variant
  - tests.py contains some of the tests performed in class
- - testinputs.txt, traindata.txt are the files provided by the instructor
- - results.json contains results from every version of regression performed
- - testoutputs.txt contains predictions corresponding to testinputs.txt from the best regression variant
+ - traindata.txt: file provided by the instructor
+ - transforms.py: feature engineering functions

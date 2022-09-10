@@ -13,7 +13,6 @@ from sklearn.base import RegressorMixin
 from sklearn.cluster import FeatureAgglomeration
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LinearRegression
-from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer, StandardScaler
 
@@ -24,19 +23,32 @@ from transforms import NoTransform, PolynomialTransform
 np.random.seed(0)
 
 
+def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Calculate the mean squared error between two arrays.
+
+    Args:
+        y_true (np.ndarray): true values
+        y_pred (np.ndarray): predicted values
+
+    Returns:
+        float: mean squared error
+    """
+    return ((y_true - y_pred) ** 2).mean()
+
+
 def cross_validation(
     reg: RegressorMixin, X: np.ndarray, y: np.ndarray, k: int
 ) -> np.ndarray:
     """Perform cross validation and return the msr for each fold.
 
     Args:
-        reg: a regression model that implements fit() and score()
-        X: training data
-        y: corresponding regression values
-        k: number of folds
+        reg: a regression model that implements fit() and predict()
+        X (np.ndarray): training data
+        y (np.ndarray): corresponding regression values
+        k (np.ndarray): number of folds
 
     Returns:
-        scores for each fold, as returned by reg.score()
+        (np.ndarray) mean squared error for each fold
     """
     n = len(y)
     msrs = np.empty(k)
@@ -46,12 +58,12 @@ def cross_validation(
         X_train, X_test = np.concatenate((X[0:start], X[end:n])), X[start:end]
         y_train, y_test = np.concatenate((y[0:start], y[end:n])), y[start:end]
         reg = reg.fit(X_train, y_train)
-        msr = reg.score(X_test, y_test)
-        msrs[k_i] = msr
+        y_pred = reg.predict(X_test)
+        msrs[k_i] = mean_squared_error(y_test, y_pred)
     return msrs
 
 
-def main(k:int, p:int, results_file:str, save_all:bool, verbose:bool) -> None:
+def main(k: int, p: int, results_file: str, save_all: bool, verbose: bool) -> None:
     """Test different transformations and models and record predictions for test data.
 
     Args:
@@ -67,66 +79,52 @@ def main(k:int, p:int, results_file:str, save_all:bool, verbose:bool) -> None:
     X, y = train_data[:, 0:8], train_data[:, 8]
     # Establish the transformations to perform on the data
     expanders = (
-        [lambda: PolynomialTransform(i, True) for i in range(2, p + 1)] +
-        [lambda: PolynomialTransform(i, False) for i in range(2, p + 1)] +
-        [lambda: NoTransform()]
+        [lambda: PolynomialTransform(i, True) for i in range(2, p + 1)]
+        + [lambda: PolynomialTransform(i, False) for i in range(2, p + 1)]
+        + [lambda: NoTransform()]
     )
-    normalizers = [
+    preprocessors = [
         lambda: Normalizer("l1"),
         lambda: Normalizer("l2"),
         lambda: Normalizer("max"),
-        lambda: NoTransform()
-    ]
-    standardizers = [
         lambda: StandardScaler(),
-        lambda: NoTransform()
+        lambda: NoTransform(),
     ]
-    reducers = [
-        lambda: FeatureAgglomeration(),
-        lambda: PCA(),
-        lambda: NoTransform()
-    ]
+    reducers = [lambda: FeatureAgglomeration(), lambda: PCA(), lambda: NoTransform()]
     regressors = [
         lambda: LR(),
-        # lambda: LinearRegression(),
-        # lambda: MLPRegressor(),
+        lambda: LinearRegression(),
     ]
     # Perform regression with all different kinds of transformations and models
     results = []
     i = 0
-    total = (
-        len(expanders) *
-        len(normalizers) *
-        len(standardizers) *
-        len(reducers) *
-        len(regressors)
-    )
+    total = len(expanders) * len(preprocessors) * len(reducers) * len(regressors)
     for expander in expanders:
-        for normalizer in normalizers:
-            for scalar in standardizers:
-                for reducer in reducers:
-                    for regressor in regressors:
-                        i += 1
-                        if verbose:
-                            print(f"{i} / {total} = {i / total * 100}%")
-                        pipeline = Pipeline(
-                            [
-                                ("expander", expander()),
-                                ("normalizer", normalizer()),
-                                ("scalar", scalar()),
-                                ("reducer", reducer()),
-                                ("regressor", regressor()),
-                            ]
-                        )
-                        rep = [f"{s[0]}: {s[1]}" for s in pipeline.steps]
-                        msr = cross_validation(pipeline, X, y, k).mean()
-                        predictions = list(pipeline.predict(test_data))
-                        results.append({
+        for preprocessor in preprocessors:
+            for reducer in reducers:
+                for regressor in regressors:
+                    i += 1
+                    if verbose:
+                        print(f"{i} / {total} = {i / total * 100}%")
+                    pipeline = Pipeline(
+                        [
+                            ("expander", expander()),
+                            ("preprocessor", preprocessor()),
+                            ("reducer", reducer()),
+                            ("regressor", regressor()),
+                        ]
+                    )
+                    rep = [f"{s[0]}: {s[1]}" for s in pipeline.steps]
+                    msr = cross_validation(pipeline, X, y, k).mean()
+                    predictions = list(pipeline.predict(test_data))
+                    results.append(
+                        {
                             "Rank": i,
                             "MSR": msr,
                             "Pipeline": rep,
-                            "Predictions": predictions
-                        })
+                            "Predictions": predictions,
+                        }
+                    )
     # Sort results by MSR score
     results.sort(key=lambda x: x["MSR"])
     for i, r in enumerate(results):

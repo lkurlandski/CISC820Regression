@@ -11,8 +11,7 @@ import numpy as np
 
 
 class PolynomialTransform:
-
-    def __init__(self, degree:int, interactions:bool):
+    def __init__(self, degree: int, interactions: bool):
         """Create the polynomial transform.
 
         Args:
@@ -27,16 +26,18 @@ class PolynomialTransform:
 
     def __repr__(self):
         return (
-            "PolynomialTransform(" +
-                f"degree={self.degree}, " +
-                f"interactions={self.interactions}" +
-            ")"
+            "PolynomialTransform("
+            + f"degree={self.degree}, "
+            + f"interactions={self.interactions}"
+            + ")"
         )
 
-    def fit(self, X: Optional[np.ndarray]=None, y:Optional[np.ndarray]=None) -> PolynomialTransform:
+    def fit(
+        self, X: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None
+    ) -> PolynomialTransform:
         return self
 
-    def transform(self, X: np.ndarray, y:Optional[np.ndarray]=None) -> np.ndarray:
+    def transform(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> np.ndarray:
         """Perform polynomial expansion of the features.
 
         Args:
@@ -48,20 +49,25 @@ class PolynomialTransform:
         # Expresses the columns from the original X to multiply together to form new X
         # e.g., [(0,), (0, 0), (0, 0, 0)] signifies X[:, 0]^1, X[:, 0]^2, X[:, 0]^3
         if self.interactions:
-            combos = list(chain.from_iterable((
-                combinations_with_replacement(range(X.shape[1]), i)
-                for i in range(1, self.degree + 1))
-            ))
+            combos = list(
+                chain.from_iterable(
+                    (
+                        combinations_with_replacement(range(X.shape[1]), i)
+                        for i in range(1, self.degree + 1)
+                    )
+                )
+            )
         else:
             combos = [[i for _ in range(self.degree)] for i in range(X.shape[1])]
         # Create the new X by performing element-wise multiplication
         X = np.concatenate(
-            [np.prod(X[:, c], axis=1, keepdims=True) for c in combos],
-            axis=1
+            [np.prod(X[:, c], axis=1, keepdims=True) for c in combos], axis=1
         )
         return X
 
-    def fit_transform(self, X: np.ndarray, y:Optional[np.ndarray]=None) -> np.ndarray:
+    def fit_transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         self.fit(X)
         return self.transform(X)
 
@@ -75,11 +81,15 @@ class NoTransform:
     def __str__(self):
         return repr(self)
 
-    def fit(self, X: Optional[np.ndarray]=None, y: Optional[np.ndarray]=None) -> NoTransform:
+    def fit(
+        self, X: Optional[np.ndarray] = None, y: Optional[np.ndarray] = None
+    ) -> NoTransform:
         return self
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         return X
 
-    def fit_transform(self, X: np.ndarray, y: Optional[np.ndarray]=None) -> np.ndarray:
+    def fit_transform(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         return X
