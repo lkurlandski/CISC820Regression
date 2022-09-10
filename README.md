@@ -45,6 +45,10 @@ Once the proper version of Python and dependencies are installed, run the main p
 
 ```python main.py```
 
+Query the options for the main program with
+
+```python main.py --help```
+
 the unit tests with
 
 ```pytest main.py```
