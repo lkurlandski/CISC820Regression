@@ -106,6 +106,7 @@ def main(k: int, p: int, results_file: str, save_all: bool, verbose: bool) -> No
                     i += 1
                     if verbose:
                         print(f"{i} / {total} = {i / total * 100}%")
+                    # Pipeline of transformations, ending with regressor model
                     pipeline = Pipeline(
                         [
                             ("expander", expander()),
@@ -115,8 +116,12 @@ def main(k: int, p: int, results_file: str, save_all: bool, verbose: bool) -> No
                         ]
                     )
                     rep = [f"{s[0]}: {s[1]}" for s in pipeline.steps]
+                    # Average mean squared error of each fold from cross val
                     msr = cross_validation(pipeline, X, y, k).mean()
+                    # Train pipeline on complete set of data training data
+                    pipeline.fit(X, y)
                     predictions = list(pipeline.predict(test_data))
+                    # Update results
                     results.append(
                         {
                             "Rank": i,
