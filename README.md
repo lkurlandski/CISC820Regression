@@ -10,7 +10,7 @@ The easiest way to install the dependencies is to use conda,
 
 ```conda create --name py310 python=3.10.4 ```
 
-```source activate py310```
+```conda activate py310```
 
 ```conda install black numpy pytest scikit-learn```
 
