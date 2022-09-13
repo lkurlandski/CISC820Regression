@@ -12,12 +12,14 @@ import numpy as np
 from sklearn.base import RegressorMixin
 from sklearn.cluster import FeatureAgglomeration
 from sklearn.decomposition import PCA
-from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import Normalizer, StandardScaler
+from sklearn.svm import SVR
 
 from linear_regression import LR
 from transforms import NoTransform, PolynomialTransform
+import neural_net_eval
+import neural_net_train
 
 
 np.random.seed(0)
@@ -84,16 +86,14 @@ def main(k: int, p: int, results_file: str, save_all: bool, verbose: bool) -> No
         + [lambda: NoTransform()]
     )
     preprocessors = [
-        lambda: Normalizer("l1"),
-        lambda: Normalizer("l2"),
-        lambda: Normalizer("max"),
+        lambda: Normalizer(),
         lambda: StandardScaler(),
         lambda: NoTransform(),
     ]
     reducers = [lambda: FeatureAgglomeration(), lambda: PCA(), lambda: NoTransform()]
     regressors = [
         lambda: LR(),
-        lambda: LinearRegression(),
+        lambda: SVR(),
     ]
     # Perform regression with all different kinds of transformations and models
     results = []
@@ -144,12 +144,22 @@ def main(k: int, p: int, results_file: str, save_all: bool, verbose: bool) -> No
         json.dump(results, f, indent=4, default=lambda x: repr(x))
 
 
+def submission():
+    """Produces the submission file only."""
+    neural_net_train.main()
+    neural_net_eval.main()
+
+
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument("--submission", action="store_true", help="produce submission")
     parser.add_argument("-k", type=int, default=5, help="number of folds for cv")
     parser.add_argument("-p", type=int, default=3, help="max polynomial degree")
     parser.add_argument("-r", type=str, default="results.json", help="results file")
     parser.add_argument("-s", action="store_true", help="save all predictions")
     parser.add_argument("-v", action="store_true", help="verbose")
     args = parser.parse_args()
-    main(args.k, args.p, args.r, args.s, args.v)
+    if args.submission:
+        submission()
+    else:
+        main(args.k, args.p, args.r, args.s, args.v)
