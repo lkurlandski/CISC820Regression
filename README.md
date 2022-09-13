@@ -8,11 +8,15 @@ Project 1: Linear Feature Engineering
 ## Environment Setup
 The easiest way to install the dependencies is to use conda,
 
+```conda init```
+
 ```conda create --name py310 python=3.10.4 ```
 
-```source activate py310```
+```conda activate py310```
 
-```conda install black numpy pytest scikit-learn pytorch```
+```conda install black numpy pytest scikit-learn```
+
+```conda install -c pytorch pytorch```
 
 Alternatively, using Python 3.10.4, with pip and env,
 
@@ -20,7 +24,7 @@ Alternatively, using Python 3.10.4, with pip and env,
 
 ```source env/bin/activate```
 
-```pip install black numpy pytest scikit-learn torch```
+```pip install black numpy pytest scikit-learn torch==1.12.1```
 
 ## Running the Program
 For the TA grading the assignment, this is likely the only command you will need to run after setting up the environment. To reproduce the results produced for submission, run
