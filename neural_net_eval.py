@@ -47,10 +47,11 @@ def main():
     best_fold = history["best_fold"]
     vl = history["mean_val_losses"]
 
-    print(f"All Val Loss: {vl}")
+    print(f"All Validation Loss in each fold from 1 to 10: {vl}")
 
     ## Load best model to predict on test
     model = LinearNet(test_data.shape[1], 16, 2, 7)
+    print(f"Best fold: {best_fold + 1}, with validation loss: {vl[best_fold]}")
     model.load_state_dict(torch.load(f"./models/model_fold_{best_fold}.pth"))
     model.eval()
 
@@ -58,6 +59,7 @@ def main():
         results = model(torch.from_numpy(test_data).float())
 
         np.savetxt("testoutputs_nn.txt", results.numpy(), fmt="%10.20f")
+    print("The result is saved into `testoutputs_nn.txt`")
 
 if __name__ == "__main__":
     main()
