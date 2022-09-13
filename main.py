@@ -149,6 +149,27 @@ def submission():
     neural_net_train.main()
     neural_net_eval.main()
 
+    # Assuming the NN outperforms the model below, this has been commented out
+    # test_data = np.loadtxt("testinputs.txt")
+    # train_data = np.loadtxt("traindata.txt")
+    # X, y = train_data[:, 0:8], train_data[:, 8]
+    # pipeline = Pipeline(
+    #     [
+    #         ("expander", NoTransform()),
+    #         ("preprocessor", Normalizer()),
+    #         ("reducer", PCA()),
+    #         ("regressor", LR()),
+    #     ]
+    # )
+    # k = 10
+    # k_folds_msr = cross_validation(pipeline, X, y, k).mean()
+    # pipeline.fit(X, y)
+    # train_msr = mean_squared_error(y, pipeline.predict(X))
+    # np.savetxt("testoutputs.txt", pipeline.predict(test_data))
+    # print(f"For the best shallow model:")
+    # print(f"\t{k}-fold MSR: {k_folds_msr}")
+    # print(f"\tTrain MSR: {train_msr}")
+
 
 if __name__ == "__main__":
     parser = ArgumentParser()

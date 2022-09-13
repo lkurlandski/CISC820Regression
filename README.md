@@ -12,7 +12,9 @@ The easiest way to install the dependencies is to use conda,
 
 ```source activate py310```
 
-```conda install black numpy pytest scikit-learn pytorch```
+```conda install black numpy pytest scikit-learn```
+
+```conda install -c pytorch pytorch```
 
 Alternatively, using Python 3.10.4, with pip and env,
 
@@ -20,7 +22,7 @@ Alternatively, using Python 3.10.4, with pip and env,
 
 ```source env/bin/activate```
 
-```pip install black numpy pytest scikit-learn torch```
+```pip install black numpy pytest scikit-learn torch==1.12.1```
 
 ## Running the Program
 For the TA grading the assignment, this is likely the only command you will need to run after setting up the environment. To reproduce the results produced for submission, run
