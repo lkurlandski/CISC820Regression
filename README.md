@@ -8,6 +8,8 @@ Project 1: Linear Feature Engineering
 ## Environment Setup
 The easiest way to install the dependencies is to use conda,
 
+```conda init```
+
 ```conda create --name py310 python=3.10.4 ```
 
 ```conda activate py310```
