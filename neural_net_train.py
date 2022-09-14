@@ -91,6 +91,7 @@ def train_and_save_model(X_train, X_val, y_train, y_val, fold):
 
     n_epochs = 10
     best_mean_val_loss = 1e8
+    best_train_loss = 1e8
     for i in range(n_epochs):
         print(f"------------ Epoch {i + 1} ---------")
         for j, [batch_x, batch_y] in enumerate(train_loader):
@@ -100,7 +101,7 @@ def train_and_save_model(X_train, X_val, y_train, y_val, fold):
             
             # Compute loss and back prop
             loss = torch.nn.functional.mse_loss(output, batch_y)
-            print (f"[Epoch {i + 1}, Step {j + 1}] Training Loss: {loss}")
+            print (f"[Fold {fold}, Epoch {i + 1}, Step {j + 1}] Training Loss: {loss}")
             loss.backward()
             
             # Adjust learning weights
@@ -113,12 +114,17 @@ def train_and_save_model(X_train, X_val, y_train, y_val, fold):
             print(f"[Epoch {i + 1}] Validation loss: {val_loss}")
             # val_losses.append(val_loss.item())
 
+            out = model(torch.from_numpy(X_train).float())
+            label = torch.from_numpy(y_train).float()
+            loss = torch.nn.functional.mse_loss(out, label)
+
         ## Save model
         if val_loss < best_mean_val_loss:
             best_mean_val_loss = val_loss
+            best_train_loss = loss
             torch.save(model.state_dict(), model_path)
 
-    return best_mean_val_loss
+    return best_mean_val_loss, best_train_loss
 
 def main():
     """Test different transformations and models and record predictions for test data.
@@ -135,15 +141,17 @@ def main():
 
     best_fold = -1
     mean_val_losses = []
+    mean_losses = []
     for fold, [X_train, X_val, y_train, y_val] in enumerate(fold_data):
-        mean_val_loss = train_and_save_model(X_train, X_val, y_train, y_val, fold)
+        mean_val_loss, mean_loss = train_and_save_model(X_train, X_val, y_train, y_val, fold)
         mean_val_losses.append(mean_val_loss)
+        mean_losses.append(mean_loss)
         if mean_val_loss < best_loss:
             best_loss = mean_val_loss
             best_fold = fold
 
 
-    np.savez("history.npz", best_fold=best_fold, mean_val_losses=mean_val_losses)
+    np.savez("history.npz", best_fold=best_fold, mean_val_losses=mean_val_losses, mean_losses=mean_losses)
 
     print("Done!")
 

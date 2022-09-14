@@ -46,12 +46,14 @@ def main():
     
     best_fold = history["best_fold"]
     vl = history["mean_val_losses"]
+    l = history["mean_losses"]
 
+    print(f"All Training Loss in each fold from 1 to 10: {l}")
     print(f"All Validation Loss in each fold from 1 to 10: {vl}")
 
     ## Load best model to predict on test
     model = LinearNet(test_data.shape[1], 16, 2, 7)
-    print(f"Best fold: {best_fold + 1}, with validation loss: {vl[best_fold]}")
+    print(f"Best fold: {best_fold + 1}, with loss: {l[best_fold]}, and validation loss: {vl[best_fold]}")
     model.load_state_dict(torch.load(f"./models/model_fold_{best_fold}.pth"))
     model.eval()
 
