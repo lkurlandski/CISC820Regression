@@ -30,6 +30,7 @@ Alternatively, using Python 3.10.4, with pip and env,
 For the TA grading the assignment, this is likely the only command you will need to run after setting up the environment. To reproduce the results produced for submission, run
 
 ```python main.py --submission```
+the reuslt will be in the file `testoutputs_nn.txt`.
 
 To run a bulk set of experiments, run
 
